@@ -1,158 +1,19 @@
-#include <iostream>
-#include <new>
-#include <math.h>
-#include <GL/glut.h>
+#include "library.h"
 
-#include <armadillo>
+int window;
+int mp=-1, droite=0, gauche=0;
 
-//const float PI = 3.1415926535;
-
-// variables globales pour OpenGL
-int window,width,height;
-const int NMAX = 100;
-int N = 0;
-
-int mp=-1,droite=0,gauche=0;
-
-struct Point {
-	float x,y;
-	Point(float a=0, float b=0) {set(a,b);}
-	void set(float a, float b) {x=a;y=b;}
-};
+int N=0;
+Point Pts[NMAX];
+arma::mat matCurve;
+std::vector<arma::mat> matCurves;
+double spline = 0.5;    // spline parameter for Catmull Rom curve
 
 enum TypeCurve {
     bezier = 0,
     bspline,
     catmullrom
 } type_curve = bezier; // default
-
-Point Pts[NMAX];
-arma::mat matCurve;
-std::vector<arma::mat> matCurves;
-double spline = 0.5;    // spline parameter for Catmull Rom curve
-
-void createBezierCubic(){
-	float t = 0.0;
-
-	arma::mat M = {
-		{-1, 3, -3, 1},
-		{3, -6, 3, 0},
-		{-3, 3, 0, 0},
-		{1, 0, 0, 0}
-	};
-
-
-    arma::mat P = {
-        {Pts[N-4].x, Pts[N-4].y},
-        {Pts[N-3].x, Pts[N-3].y},
-        {Pts[N-2].x, Pts[N-2].y},
-        {Pts[N-1].x, Pts[N-1].y}
-    };
-
-	arma::mat T = {
-		{0, 0, 0, 1}
-	};
-
-	t+=0.01;
-	for(int i=1; t<1; t+=0.01){
-		arma::mat matLine = {pow (t, 3.0), pow (t, 2.0), pow (t, 1.0), 1};
-
-		T.insert_rows (i, matLine);
-		++i;
-	}
-
-    //matCurve = T * M * P;
-    matCurves.push_back(T * M * P);
-}
-
-void createBSplineCubic(){
-    float t = 0.0;
-
-    arma::mat M = {
-            {-1, 3, -3, 1},
-            {3, -6, 3, 0},
-            {-3, 0, 3, 0},
-            {1, 4, 1, 0}
-    };
-
-
-    arma::mat P = {
-            {Pts[N-4].x, Pts[N-4].y},
-            {Pts[N-3].x, Pts[N-3].y},
-            {Pts[N-2].x, Pts[N-2].y},
-            {Pts[N-1].x, Pts[N-1].y}
-    };
-
-    arma::mat T = {
-            {0, 0, 0, 1}
-    };
-
-    t+=0.01;
-    for(int i=1; t<1; t+=0.01){
-        arma::mat matLine = {pow (t, 3.0), pow (t, 2.0), pow (t, 1.0), 1};
-
-        T.insert_rows (i, matLine);
-        ++i;
-    }
-
-    //matCurve = T * (M/6) * P;
-    matCurves.push_back(T * (M/6) * P);
-}
-
-void createCatmullRomCubic(){
-    float t = 0.0;
-
-    arma::mat M = {
-            {-1, 3, -3, 1},
-            {2, -5, 4, -1},
-            {-1, 0, 1, 0},
-            {0, 2, 0, 0}
-    };
-
-
-    arma::mat P = {
-            {Pts[N-4].x, Pts[N-4].y},
-            {Pts[N-3].x, Pts[N-3].y},
-            {Pts[N-2].x, Pts[N-2].y},
-            {Pts[N-1].x, Pts[N-1].y}
-    };
-
-    arma::mat T = {
-            {0, 0, 0, 1}
-    };
-
-    t+=0.01;
-    for(int i=1; t<1; t+=0.01){
-        arma::mat matLine = {pow (t, 3.0), pow (t, 2.0), pow (t, 1.0), 1};
-
-        T.insert_rows (i, matLine);
-        ++i;
-    }
-
-    std::cout << "spline parameter : " << spline << std::endl;
-
-    //matCurve = T * (M * spline) * P;
-    matCurves.push_back(T * (M * spline) * P);
-}
-
-void drawCurve(){
-	glBegin(GL_LINE_STRIP);
-	int nbRow = matCurve.n_rows;
-	for(int i=0; i<nbRow; i++){
-		glVertex2f(matCurve(i, 0), matCurve(i, 1));
-	}
-	glEnd();
-}
-void drawCurves(){
-    for(auto matBezier : matCurves){
-        glBegin(GL_LINE_STRIP);
-        int nbRow = matBezier.n_rows;
-        for(int i=0; i<nbRow; i++){
-            glVertex2f(matBezier(i, 0), matBezier(i, 1));
-        }
-        glEnd();
-    }
-}
 
 
 void Trace()
@@ -358,12 +219,12 @@ int main (int argc, char** argv)
 {
 
     glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
-    glutInitWindowSize(500, 500);
+    glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutInitWindowPosition(0, 0);
     glutInit(&argc, argv);
 	glEnable(GL_DEPTH_TEST);
     
-    window = glutCreateWindow("Select");
+    window = glutCreateWindow("Curves");
     glutReshapeFunc(main_reshape);
     glutDisplayFunc(main_display);
   	glutMouseFunc(Mouse);
