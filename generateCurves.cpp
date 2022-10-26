@@ -20,6 +20,12 @@ struct Point {
 	void set(float a, float b) {x=a;y=b;}
 };
 
+enum TypeCurve {
+    bezier = 0,
+    bspline,
+    catmullrom
+} type_curve = bezier; // default
+
 Point Pts[NMAX];
 arma::mat matCurve;
 std::vector<arma::mat> matCurves;
@@ -188,6 +194,28 @@ main_display(void)
 		glEnd();	
 	}
 
+    switch (type_curve) {
+        case bezier :
+            if(N==4 || (N>4 && N%3 == 1)){
+                createBezierCubic();
+            }
+            break;
+        case bspline :
+            if(N > 3){
+                createBSplineCubic();
+            }
+            break;
+        case catmullrom :
+            if(N > 3){
+                createCatmullRomCubic();
+            }
+            break;
+        default:
+            break;
+    }
+
+    drawCurves();
+
     // Bezier :
     /*if(N==4 || (N>4 && N%3 == 1)){
         createBezierCubic();
@@ -205,10 +233,10 @@ main_display(void)
     drawCurves();*/
 
     // Catmull-Rom :
-    if(N > 3){
+    /*if(N > 3){
         createCatmullRomCubic();
     }
-    drawCurves();
+    drawCurves();*/
 
 	glutPostRedisplay();
 	
@@ -320,6 +348,12 @@ void Motion(int x, int y) {
 	}
 }
 
+static void menu (int item)
+{
+    type_curve = static_cast<TypeCurve> (item);
+    glutPostRedisplay ();
+}
+
 int main (int argc, char** argv)
 {
 
@@ -335,6 +369,13 @@ int main (int argc, char** argv)
   	glutMouseFunc(Mouse);
 	glutMotionFunc(Motion);
     glutSpecialFunc(specialKeyListener);
+
+    // Menu to choose type of curve
+    glutCreateMenu (menu);
+    glutAddMenuEntry ("Bezier", bezier);
+    glutAddMenuEntry ("B-Spline", bspline);
+    glutAddMenuEntry ("Catmull-Rom", catmullrom);
+    glutAttachMenu (GLUT_RIGHT_BUTTON); // right click to open menu
 
 	glutPostRedisplay();  
     glutMainLoop();
