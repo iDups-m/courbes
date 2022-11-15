@@ -2,14 +2,6 @@
 
 /* Curves creation */
 void createBezierCubic(){
-    float t = 0.0;
-
-    arma::mat M = {
-            {-1, 3, -3, 1},
-            {3, -6, 3, 0},
-            {-3, 3, 0, 0},
-            {1, 0, 0, 0}
-    };
 
     arma::mat P = {
             {Pts[N-4].x, Pts[N-4].y},
@@ -18,32 +10,10 @@ void createBezierCubic(){
             {Pts[N-1].x, Pts[N-1].y}
     };
 
-    arma::mat T = {
-            {0, 0, 0, 1}
-    };
-
-    t+=0.01;
-    for(int i=1; t<1; t+=0.01){
-        arma::mat matLine = {pow (t, 3.0), pow (t, 2.0), pow (t, 1.0), 1};
-
-        T.insert_rows (i, matLine);
-        ++i;
-    }
-
-    //matCurve = T * M * P;
-    matCurves.push_back(T * M * P);
+    matCurves.push_back(T * M_Bezier * P);
 }
 
 void createBSplineCubic(){
-    float t = 0.0;
-
-    arma::mat M = {
-            {-1, 3, -3, 1},
-            {3, -6, 3, 0},
-            {-3, 0, 3, 0},
-            {1, 4, 1, 0}
-    };
-
 
     arma::mat P = {
             {Pts[N-4].x, Pts[N-4].y},
@@ -52,32 +22,10 @@ void createBSplineCubic(){
             {Pts[N-1].x, Pts[N-1].y}
     };
 
-    arma::mat T = {
-            {0, 0, 0, 1}
-    };
-
-    t+=0.01;
-    for(int i=1; t<1; t+=0.01){
-        arma::mat matLine = {pow (t, 3.0), pow (t, 2.0), pow (t, 1.0), 1};
-
-        T.insert_rows (i, matLine);
-        ++i;
-    }
-
-    //matCurve = T * (M/6) * P;
-    matCurves.push_back(T * (M/6) * P);
+    matCurves.push_back(T * (M_BSpline/6) * P);
 }
 
 void createCatmullRomCubic(){
-    float t = 0.0;
-
-    arma::mat M = {
-            {-1, 3, -3, 1},
-            {2, -5, 4, -1},
-            {-1, 0, 1, 0},
-            {0, 2, 0, 0}
-    };
-
 
     arma::mat P = {
             {Pts[N-4].x, Pts[N-4].y},
@@ -86,22 +34,9 @@ void createCatmullRomCubic(){
             {Pts[N-1].x, Pts[N-1].y}
     };
 
-    arma::mat T = {
-            {0, 0, 0, 1}
-    };
-
-    t+=0.01;
-    for(int i=1; t<1; t+=0.01){
-        arma::mat matLine = {pow (t, 3.0), pow (t, 2.0), pow (t, 1.0), 1};
-
-        T.insert_rows (i, matLine);
-        ++i;
-    }
-
     std::cout << "spline parameter : " << spline << std::endl;
 
-    //matCurve = T * (M * spline) * P;
-    matCurves.push_back(T * (M * spline) * P);
+    matCurves.push_back(T * (M_CatmullRom * spline) * P);
 }
 
 /* Curves render - one or several curves */

@@ -25,6 +25,11 @@ extern arma::mat matCurve;
 extern std::vector<arma::mat> matCurves;
 extern double spline;    // spline parameter for Catmull Rom curve
 
+extern arma::mat M_Bezier;
+extern arma::mat M_BSpline;
+extern arma::mat M_CatmullRom;
+extern arma::mat T;
+
 
 /* Curves creation */
 void createBezierCubic();

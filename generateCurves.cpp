@@ -9,12 +9,52 @@ arma::mat matCurve;
 std::vector<arma::mat> matCurves;
 double spline = 0.5;    // spline parameter for Catmull Rom curve
 
+arma::mat M_Bezier;
+arma::mat M_BSpline;
+arma::mat M_CatmullRom;
+arma::mat T;
+
 enum TypeCurve {
     bezier = 0,
     bspline,
     catmullrom
 } type_curve = bezier; // default
 
+
+void initContext(){
+    M_Bezier = {
+        {-1, 3, -3, 1},
+        {3, -6, 3, 0},
+        {-3, 3, 0, 0},
+        {1, 0, 0, 0}
+    };
+
+    M_BSpline = {
+        {-1, 3, -3, 1},
+        {3, -6, 3, 0},
+        {-3, 0, 3, 0},
+        {1, 4, 1, 0}
+    };
+
+    M_CatmullRom = {
+        {-1, 3, -3, 1},
+        {2, -5, 4, -1},
+        {-1, 0, 1, 0},
+        {0, 2, 0, 0}
+    };
+
+    T = {
+        {0, 0, 0, 1}
+    };
+
+    float t = 0.1;
+    for(int i=1; t<1; t+=0.01){
+        arma::mat matLine = {pow (t, 3.0), pow (t, 2.0), pow (t, 1.0), 1};
+
+        T.insert_rows (i, matLine);
+        ++i;
+    }
+}
 
 void Trace()
 {
@@ -223,6 +263,7 @@ int main (int argc, char** argv)
     glutInitWindowPosition(0, 0);
     glutInit(&argc, argv);
 	glEnable(GL_DEPTH_TEST);
+    initContext();
     
     window = glutCreateWindow("Curves");
     glutReshapeFunc(main_reshape);
